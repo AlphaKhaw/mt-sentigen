@@ -46,7 +46,7 @@ class DataDownloader:
         output_folderpath = self.cfg.data_downloader.output_folder
 
         # Send a GET request to the specified URL to retrieve webpage content
-        response = requests.get(url)
+        response = requests.get(url, timeout=10)
 
         # Create a BeautifulSoup object to parse the HTML content of webpage
         soup = BeautifulSoup(response.content, "html.parser")
@@ -103,7 +103,7 @@ class DataDownloader:
             logging.info(f"File already exits: {filepath}")
             return
 
-        res = requests.get(url)
+        res = requests.get(url, timeout=10)
         if res.status_code == 200:
             with open(filepath, "wb") as file:
                 file.write(res.content)
