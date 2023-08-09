@@ -1,0 +1,32 @@
+name: Pylint and Pytest
+
+on: [push]
+
+jobs:
+  pylint_pytest:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.10
+
+      - name: Install dependencies
+        run: |
+          pip install pylint pytest
+          conda env create -f mt-sentigen-conda-env.yaml
+          source activate mt-sentigen
+          conda install -c anaconda curl
+
+      - name: Run pylint and pytest
+        run: |
+          pylint src --fail-under=6.5 --ignore=tests --disable=W1202
+          pytest src/tests
+
+      - name: Clean up
+        run: |
+          source deactivate
