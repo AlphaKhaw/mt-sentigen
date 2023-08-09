@@ -18,6 +18,7 @@ jobs:
       - name: Install dependencies
         run: |
           conda env create -f mt-sentigen-conda-env.yaml
+          conda init bash
           conda activate mt-sentigen
           conda install -c anaconda curl
 
