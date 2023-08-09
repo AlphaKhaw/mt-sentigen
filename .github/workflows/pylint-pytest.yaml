@@ -10,10 +10,10 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      # - name: Set up Python
-      #   uses: actions/setup-python@v2
-      #   with:
-      #     python-version: 3.10.12
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.10.12
 
       # - name: Install dependencies
       #   run: |
@@ -30,13 +30,6 @@ jobs:
       # - name: Clean up
       #   run: |
       #     conda deactivate
-
-      - name: Set up Conda
-        uses: conda-incubator/setup-miniconda@v2
-        with:
-          auto-update-conda: true
-          conda-version: '4.10.x'
-          python-version: 3.10
 
       - name: Create and activate Conda environment
         run: |
