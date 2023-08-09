@@ -17,7 +17,6 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install pylint pytest
           conda env create -f mt-sentigen-conda-env.yaml
           conda activate mt-sentigen
           conda install -c anaconda curl
