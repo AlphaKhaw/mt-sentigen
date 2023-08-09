@@ -27,7 +27,7 @@ jobs:
 
       - name: Run pylint and pytest
         run: |
-          conda run -n mt-sentigen pytest pylint src --fail-under=4.5 --ignore=tests --disable=W1202
+          conda run -n mt-sentigen pylint src --fail-under=4.5 --ignore=tests --disable=W1202
           conda run -n mt-sentigen pytest src/tests
 
       - name: Clean up Conda environment
