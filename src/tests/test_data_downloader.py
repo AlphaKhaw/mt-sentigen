@@ -32,7 +32,7 @@ def config() -> DictConfig:
 
 
 @pytest.fixture
-def data_downloader(config) -> DataDownloader:
+def data_downloader(config: DictConfig) -> DataDownloader:
     """
     Fixture to provide a DataDownloader instance for testing.
 
@@ -63,7 +63,9 @@ def test_create_folders(data_downloader: DataDownloader) -> None:
 
 
 @pytest.mark.parametrize("use_metadata", [True, False])
-def test_extract_download_links(data_downloader, use_metadata):
+def test_extract_download_links(
+    data_downloader: DataDownloader, use_metadata: bool
+) -> None:
     """
     Test the _extract_download_links method of the DataDownloader class.
 
