@@ -89,6 +89,26 @@ def parse_into_dataframe(path: str) -> pd.DataFrame:
         )
 
 
+def parse_files_into_dataframe(path: str) -> pd.DataFrame:
+    """
+    Read in path of gzip files, parse files into DataFrame and concatenate
+    into a single DataFrame.
+
+    Args:
+        path (str): Directory of raw gzip files.
+
+    Returns:
+        pd.DataFrame: Concatenated Pandas DataFrame.
+    """
+    concatenated_dataframes = []
+    for dir in os.listdir(path):
+        dataframe = parse_into_dataframe(dir)
+        dataframe["state"] = dir.split("-")[-1].split(".")[0]
+        concatenated_dataframes.append(dataframe)
+
+    return pd.concat(concatenated_dataframes, ignore_index=True)
+
+
 def remove_files_from_folder(folder_path: str) -> None:
     """
     Remove files from the specified folder.
