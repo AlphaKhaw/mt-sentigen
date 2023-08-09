@@ -43,7 +43,7 @@ jobs:
 
       - name: Run pylint and pytest
         run: |
-          source $HOME/.bashrc
+          pip install pylint pytest
           pylint src --fail-under=6.5 --ignore=tests --disable=W1202
           pytest src/tests
 
