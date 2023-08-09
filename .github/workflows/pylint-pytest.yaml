@@ -19,7 +19,7 @@ jobs:
         run: |
           pip install pylint pytest
           conda env create -f mt-sentigen-conda-env.yaml
-          source activate mt-sentigen
+          conda activate mt-sentigen
           conda install -c anaconda curl
 
       - name: Run pylint and pytest
@@ -29,4 +29,4 @@ jobs:
 
       - name: Clean up
         run: |
-          source deactivate
+          conda deactivate
