@@ -1,5 +1,0 @@
-data_downloader:
-  base_url: "https://datarepo.eng.ucsd.edu/mcauley_group/gdrive/googlelocal/"
-  output_folder: "${hydra:runtime.cwd}/data/gzip"
-  use_subset: false
-  use_metadata: false
