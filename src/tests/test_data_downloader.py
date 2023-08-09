@@ -16,6 +16,12 @@ from data_processing.data_downloader import DataDownloader
 
 @pytest.fixture
 def config() -> DictConfig:
+    """
+    Fixture to provide a sample configuration for testing.
+
+    Returns:
+        DictConfig: A sample configuration.
+    """
     with initialize(
         config_path="../../conf/base",
         job_name="test_data_downloader",
@@ -27,10 +33,29 @@ def config() -> DictConfig:
 
 @pytest.fixture
 def data_downloader(config) -> DataDownloader:
+    """
+    Fixture to provide a DataDownloader instance for testing.
+
+    Args:
+        config (DictConfig): The sample configuration.
+
+    Returns:
+        DataDownloader: An instance of the DataDownloader class.
+    """
     return DataDownloader(config)
 
 
 def test_create_folders(data_downloader: DataDownloader) -> None:
+    """
+    Test the _create_folders method of the DataDownloader class.
+
+    Args:
+        data_downloader (DataDownloader): An instance of the DataDownloader
+            class.
+
+    Returns:
+        None
+    """
     folderpath = "test_folder"
     data_downloader._create_folders(folderpath)
     assert os.path.exists(folderpath)
@@ -39,6 +64,17 @@ def test_create_folders(data_downloader: DataDownloader) -> None:
 
 @pytest.mark.parametrize("use_metadata", [True, False])
 def test_extract_download_links(data_downloader, use_metadata):
+    """
+    Test the _extract_download_links method of the DataDownloader class.
+
+    Args:
+        data_downloader (DataDownloader): An instance of the DataDownloader
+            class.
+        use_metadata (bool): Flag indicating whether to use metadata.
+
+    Returns:
+        None
+    """
     data_table = BeautifulSoup(
         "<table><td><a href='review_link'></a></td></table>", "html.parser"
     )
