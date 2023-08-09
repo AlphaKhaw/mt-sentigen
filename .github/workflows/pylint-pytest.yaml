@@ -10,16 +10,42 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Set up Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: 3.10.12
+      # - name: Set up Python
+      #   uses: actions/setup-python@v2
+      #   with:
+      #     python-version: 3.10.12
 
-      - name: Install dependencies
+      # - name: Install dependencies
+      #   run: |
+      #     conda env create -f mt-sentigen-conda-env.yaml
+      #     source ~/anaconda3/etc/profile.d/conda.sh
+      #     conda activate mt-sentigen
+      #     conda install -c anaconda curl
+
+      # - name: Run pylint and pytest
+      #   run: |
+      #     pylint src --fail-under=6.5 --ignore=tests --disable=W1202
+      #     pytest src/tests
+
+      # - name: Clean up
+      #   run: |
+      #     conda deactivate
+
+      - name: Set up Conda
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+          auto-update-conda: true
+          conda-version: '4.10.x'
+          python-version: 3.10
+
+      - name: Create and activate Conda environment
         run: |
           conda env create -f mt-sentigen-conda-env.yaml
-          source ~/anaconda3/etc/profile.d/conda.sh
-          conda activate mt-sentigen
+          echo "conda activate mt-sentigen" >> $HOME/.bashrc
+          source $HOME/.bashrc
+
+      - name: Install additional dependencies
+        run: |
           conda install -c anaconda curl
 
       - name: Run pylint and pytest
@@ -27,6 +53,7 @@ jobs:
           pylint src --fail-under=6.5 --ignore=tests --disable=W1202
           pytest src/tests
 
-      - name: Clean up
+      - name: Clean up Conda environment
         run: |
           conda deactivate
+          conda env remove -n mt-sentigen
