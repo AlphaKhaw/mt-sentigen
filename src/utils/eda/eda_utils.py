@@ -102,9 +102,14 @@ def parse_files_into_dataframe(path: str) -> pd.DataFrame:
     """
     concatenated_dataframes = []
     for dir in os.listdir(path):
-        dataframe = parse_into_dataframe(dir)
-        dataframe["state"] = dir.split("-")[-1].split(".")[0]
+        gzip_filepath = os.path.join(path, dir)
+        dataframe = parse_into_dataframe(gzip_filepath)
+        dataframe["state"] = dir.split(".")[0].split("-")[-1]
         concatenated_dataframes.append(dataframe)
+
+        logging.info(f"Read {dir} into DataFrame")
+
+    logging.info("Returning concatenated DataFrame")
 
     return pd.concat(concatenated_dataframes, ignore_index=True)
 
