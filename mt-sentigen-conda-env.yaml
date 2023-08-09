@@ -6,8 +6,10 @@ dependencies:
   - python=3.10.12
   - pip=23.2.1
   - pre-commit=3.3.3
-  - kedro=0.18.11
+  - pylint=2.17.5
+  - pytest=7.4.0
   - ipykernel=6.25.0
+  - requests=2.31.0
   - beautifulsoup4=4.12.2
   - ipython=8.14.0
   - pandas=2.0.3

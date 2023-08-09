@@ -13,6 +13,10 @@ logging.basicConfig(level=logging.INFO)
 
 
 class DataDownloader:
+    """
+    DataDownloader class to download Google Local Data (2021) dataset.
+    """
+
     def __init__(self, cfg: DictConfig) -> None:
         """
         Initialize a DataDownloader object.
