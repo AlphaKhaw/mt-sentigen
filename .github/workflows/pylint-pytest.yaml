@@ -32,5 +32,4 @@ jobs:
 
       - name: Clean up Conda environment
         run: |
-          conda deactivate
-          conda env remove -n mt-sentigen
+          source deactivate
