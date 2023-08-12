@@ -43,7 +43,7 @@ def export_to_csv(dataframe: pd.DataFrame, filepath: str) -> None:
 
     try:
         file_path.parents[0].mkdir(parents=True, exist_ok=True)
-        dataframe.to_csv(file_path, index=False)
+        dataframe.to_csv(file_path, index=False, escapechar="\\")
         logging.info(f"Export CSV to {file_path}")
     except Exception as error:
         raise error
