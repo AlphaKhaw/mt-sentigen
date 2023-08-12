@@ -4,6 +4,7 @@ import logging
 import os
 from typing import Any, Dict, Iterator
 
+import matplotlib.pyplot as plt
 import pandas as pd
 import requests
 
@@ -141,3 +142,65 @@ def remove_files_from_folder(folder_path: str) -> None:
                 logging.info(f"'{file}' is not a file. Skipping...")
         except Exception as e:
             logging.info(f"An error occurred while removing '{file}': {e}")
+
+
+def map_rating_to_class(rating: float) -> str:
+    """
+    Map numeric ratings to corresponding sentiment classes.
+
+    Args:
+        rating (float): Numeric rating value.
+
+    Returns:
+        str: Sentiment class ('negative', 'neutral', or 'positive').
+    """
+    if rating <= 2.0:
+        return "negative"
+    elif rating == 3.0:
+        return "neutral"
+    else:
+        return "positive"
+
+
+def create_pie_chart(dataframe: pd.DataFrame, type_flag: str):
+    """
+    Create a pie chart visualization with percentage count based on input type
+    flag:
+    - `duplicate` - duplicated and and non-duplicated values
+    - `nan` - NaN and non-NaN values
+
+    Args:
+        dataframe (pd.DataFrame): The DataFrame containing the data.
+        type_flag (str): Two values - Duplicate or NaN values.
+
+    Returns:
+        None
+    """
+    # Count duplicated and non-duplicated values
+    if type_flag == "duplicate":
+        count = dataframe.duplicated().sum()
+    else:
+        count = dataframe.isna().sum().sum()
+
+    non_count = len(dataframe) - count
+
+    # Create labels and sizes for the pie chart
+    if type_flag == "duplicate":
+        labels = ["Duplicated", "Non-Duplicated"]
+    else:
+        labels = ["NaN", "Non-NaN"]
+    sizes = [count, non_count]
+
+    # Create the pie chart
+    plt.figure(figsize=(15, 6))
+    plt.pie(sizes, labels=labels, autopct="%1.1f%%", startangle=140)
+    plt.axis("equal")
+
+    # Set chart title
+    if type_flag == "duplicate":
+        plt.title("Duplicated vs Non-Duplicated")
+    else:
+        plt.title("NaN vs Non-NaN")
+
+    # Display the pie chart
+    plt.show()
