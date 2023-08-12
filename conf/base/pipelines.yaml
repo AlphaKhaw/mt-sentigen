@@ -1,3 +1,7 @@
+general:
+  review_col: "review"
+  metadata_col: "meta"
+
 data_downloader:
   base_url: "https://datarepo.eng.ucsd.edu/mcauley_group/gdrive/googlelocal/"
   output_folder: "${hydra:runtime.cwd}/data/gzip"
@@ -5,6 +9,7 @@ data_downloader:
   use_metadata: false
 
 data_extractor:
-  input_folder: "${data_downloader.gzip_folder}"
+  input_folder: "${data_downloader.output_folder}"
   output_folder: "${hydra:runtime.cwd}/data/raw"
+  suffix: "extracted.csv"
   remove_gzip_files: true
