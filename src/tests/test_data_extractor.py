@@ -69,6 +69,7 @@ def test_parse_and_extract(
     output_filepath = os.path.join(output_folderpath, output_filename)
 
     print("Current Working Directory:", os.getcwd())
+    print("Folder in current working directry:", os.listdir(os.getcwd()))
     
     # Read the content of the output file
     with open(output_filepath, "r") as f:
