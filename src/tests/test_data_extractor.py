@@ -50,7 +50,7 @@ def test_parse_and_extract(
     # Read in test configurations
     input_filepath = config.data_extractor.input_filepath
     output_folderpath = config.data_extractor.output_folder
-    output_suffix = config.data_extractor.output_suffix
+    output_suffix = config.data_extractor.suffix
     file_identifier = "mock_data"
     key_columns = config.data_extractor.key_columns
     expected_filepath = config.data_extractor.expected_filepath
