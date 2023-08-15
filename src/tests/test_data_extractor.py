@@ -23,7 +23,7 @@ def config() -> DictConfig:
     """
     with initialize(
         config_path="../../conf/base",
-        job_name="test_data_downloader",
+        job_name="test_data_extractor",
         version_base="1.1",
     ):
         cfg = compose(config_name="test_pipelines.yaml")
