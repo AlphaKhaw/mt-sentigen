@@ -24,6 +24,12 @@ jobs:
       - name: Install additional dependencies
         run: |
           conda install -c anaconda curl
+      
+      - name: Set up environment variables
+        run: |
+          echo "MY_INPUT_FILEPATH=${GITHUB_WORKSPACE}/data/mock/mock_data.json.gz" >> $GITHUB_ENV
+          echo "MY_OUTPUT_FOLDER=${GITHUB_WORKSPACE}/data/mock/" >> $GITHUB_ENV
+          echo "MY_EXPECTED_FILEPATH=${GITHUB_WORKSPACE}/data/mock/expected_data.json" >> $GITHUB_ENV
 
       - name: Run pylint and pytest
         run: |
