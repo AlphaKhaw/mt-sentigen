@@ -12,6 +12,12 @@ sys.path.insert(0, project_root_dir)
 
 from data_processing.data_extractor import DataExtractor
 
+initialize(
+    config_path="../../conf/base",
+    job_name="test_data_extractor",
+    version_base="1.1",
+)
+
 
 @pytest.fixture
 def config() -> DictConfig:
@@ -21,12 +27,13 @@ def config() -> DictConfig:
     Returns:
         DictConfig: A sample configuration.
     """
-    with initialize(
-        config_path="../../conf/base",
-        job_name="test_data_extractor",
-        version_base="1.1",
-    ):
-        cfg = compose(config_name="test_pipelines.yaml")
+    # with initialize(
+    #     config_path="../../conf/base",
+    #     job_name="test_data_extractor",
+    #     version_base="1.1",
+    # ):
+    #     cfg = compose(config_name="test_pipelines.yaml")
+    cfg = compose(config_name="test_pipelines.yaml")
     return cfg
 
 
