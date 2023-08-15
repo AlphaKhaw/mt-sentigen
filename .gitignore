@@ -1,5 +1,7 @@
 # Data
 data/**
+!data/mock/mock_data.json.gz
+!data/mock/expected_data.json
 
 # Hydra
 outputs/
