@@ -68,6 +68,8 @@ def test_parse_and_extract(
     output_filename = f"{file_identifier}_{output_suffix}"
     output_filepath = os.path.join(output_folderpath, output_filename)
 
+    print("Current Working Directory:", os.getcwd())
+    
     # Read the content of the output file
     with open(output_filepath, "r") as f:
         output_contents = f.read()
