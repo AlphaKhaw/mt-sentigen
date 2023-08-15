@@ -1,15 +1,20 @@
 general:
   review_col: "review"
   metadata_col: "meta"
+  mongodb_uri: "mongodb://localhost:27017/"
+  database_name: "google-local-data"
+  collection_name: "review"
 
 data_downloader:
   base_url: "https://datarepo.eng.ucsd.edu/mcauley_group/gdrive/googlelocal/"
   output_folder: "${hydra:runtime.cwd}/data/gzip"
-  use_subset: false
+  use_subset: true
   use_metadata: false
 
 data_extractor:
   input_folder: "${data_downloader.output_folder}"
-  output_folder: "${hydra:runtime.cwd}/data/raw"
-  suffix: "extracted.csv"
+  output_folder: "${hydra:runtime.cwd}/data/extracted"
+  key_columns: ["rating", "text", "resp"]
+  suffix: "extracted.json"
+  batch_size: 5
   remove_gzip_files: false
