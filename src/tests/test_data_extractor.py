@@ -68,10 +68,8 @@ def test_parse_and_extract(
     output_filename = f"{file_identifier}_{output_suffix}"
     output_filepath = os.path.join(output_folderpath, output_filename)
 
-    print(os.path.join(os.getcwd(), "data/mock/mock_data_extracted.json"))
-    print(os.path.exists(os.path.join(os.getcwd(), "data/mock/mock_data_extracted.json")))
-    output_filepath = os.path.join(os.getcwd(), "data/mock/mock_data_extracted.json")
-    expected_filepath = os.path.join(os.getcwd(), "data/mock/expected_data.json")
+    print(os.listdir(os.path.join(os.getcwd(), "data/mock/mock_data_extracted.json")))
+
     # Read the content of the output file
     with open(output_filepath, "r") as f:
         output_contents = f.read()
