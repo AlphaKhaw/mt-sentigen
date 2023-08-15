@@ -1,18 +1,12 @@
 import gzip
-import json
+import io
 import logging
 import os
-import sys
-from typing import Any, Dict, Iterator
+from concurrent.futures import ThreadPoolExecutor
 
 import hydra
-import pandas as pd
+import ujson
 from omegaconf import DictConfig
-from tqdm import tqdm
-
-sys.path.append(f"{os.path.dirname(os.path.abspath(__file__))}/../")
-
-from utils.dataframe.dataframe_utils import export_to_csv
 
 logging.warnings.filterwarnings("ignore")
 logging.basicConfig(level=logging.INFO)
@@ -25,7 +19,7 @@ class DataExtractor:
 
     def __init__(self, cfg: DictConfig) -> None:
         """
-        Initialize a DataExtractor object.
+        Initialize a DataExtractor object and initialise database.
 
         Args:
             cfg (DictConfig): hydra configuration
@@ -39,8 +33,7 @@ class DataExtractor:
         """
         Main function of DataExtractor class to:
         - Read in configurations
-        - Parse gzip files into a single concatenated dataframe
-        - Export concatenated dataframe as CSV file
+        - Parse and write gzip files into json format
 
         Args:
             None
@@ -50,101 +43,155 @@ class DataExtractor:
         """
         # Read in configurations from Hydra configuration file
         input_folderpath = self.cfg.data_extractor.input_folder
-        output_folderpath = self.cfg.data_extractor.output_folder
-        suffix = self.cfg.data_extractor.suffix
+        output_folder = self.cfg.data_extractor.output_folder
+        output_suffix = self.cfg.data_extractor.suffix
+        key_columns = self.cfg.data_extractor.key_columns
+        batch_size = self.cfg.data_extractor.batch_size
         remove_gzip_flag = self.cfg.data_extractor.remove_gzip_files
 
-        # Parse gzip files into concatenated dataframe
+        # Parse gzip files into database
         for dir_ in os.listdir(input_folderpath):
             if os.path.isdir(os.path.join(input_folderpath, dir_)):
                 logging.info(f"Reading {dir_} Gzip files")
-                self._parse_files_into_dataframe(
+                self._parse_files_into_json(
                     input_folderpath=os.path.join(input_folderpath, dir_),
-                    output_folderpath=os.path.join(output_folderpath, dir_),
-                    output_suffix=suffix,
+                    output_folderpath=os.path.join(output_folder, dir_),
+                    output_suffix=output_suffix,
+                    key_columns=key_columns,
+                    batch_size=batch_size,
                     remove_gzip_flag=remove_gzip_flag,
                 )
 
-    def _parse(self, path: str) -> Iterator[Dict[str, Any]]:
+    def _parse_and_extract(
+        self,
+        path: str,
+        output_folderpath: str,
+        output_suffix: str,
+        file_identifier: str,
+        key_columns: list,
+    ) -> None:
         """
-        Parse a Gzip-compressed JSON file and yield each JSON record as a
-        dictionary.
+        Parses a Gzip-compressed JSON file, extracts specified key columns,
+        and writes to a JSON file.
 
         Args:
-            path (str): The file path to the Gzip-compressed JSON file.
+            path (str): Path to the Gzip-compressed JSON file.
+            output_filepath (str): Path to the output JSON file.
+            output_suffix (str): Desired suffix of the extracted JSON file.
+            file_identifier (str): Name of file to parse and extract.
+            key_columns (list): List of column names to extract.
 
-        Yields:
-            Iterator[Dict[str, Any]]: An iterator that yields a dictionary
-                representing each JSON record in the file.
+        Returns:
+            None
         """
         try:
-            gzip_file = gzip.open(path, "r")
-            for line in gzip_file:
-                yield json.loads(line)
+            with gzip.open(path, "rt") as gzip_file:
+                json_data = [ujson.loads(line) for line in gzip_file]
+
+            file = path.split("/")[-1]
+            logging.info(f"Parse {file} into JSON format")
+
+            # Extract key columns
+            extracted_data = [
+                {col: json_obj.get(col) for col in key_columns}
+                for json_obj in json_data
+            ]
+            logging.info("Extracted key-value pairs")
+
+            # Construct output filepath
+            output_filename = f"{file_identifier}_{output_suffix}"
+            output_filepath = os.path.join(output_folderpath, output_filename)
+
+            # Write JSON incrementally using a buffered writer
+            with io.BufferedWriter(
+                io.FileIO(output_filepath, "w")
+            ) as output_file:
+                for entry in extracted_data:
+                    json_str = ujson.dumps(entry) + "\n"
+                    output_file.write(json_str.encode("utf-8"))
+
+            logging.info(f"JSON data written to {output_filepath}")
+
         except Exception as error:
             logging.info(
                 f"An error occurred while parsing file {path}: {error}"
             )
-            return
 
-    def _parse_files_into_dataframe(
+    def _parse_files_into_json(
         self,
         input_folderpath: str,
         output_folderpath: str,
         output_suffix: str,
+        key_columns: list,
+        batch_size: int,
         remove_gzip_flag: bool,
-    ) -> pd.DataFrame:
+    ) -> None:
         """
-        Parse multiple gzip files in the specified directory into a
-        concatenated DataFrame.
+        Parses multiple gzip files in the specified directory,
+        extracts key data, and writes JSON files.
 
         Args:
-            path (str): Filepath of input folder of downloaded gzip files.
+            input_folderpath (str): Path to input folder of downloaded gzip
+                files.
+            output_folderpath (str): Path to output folder for JSON files.
+            output_suffix (str): Suffix for output JSON files.
+            key_columns (list): List of column names to extract.
+            batch_size (int): Number of files to process concurrently in
+                each batch.
+            remove_gzip_flag (bool): Flag to remove gzip files after
+                processing.
 
         Returns:
-            pd.DataFrame: Concatenated dataframe.
+            None
         """
-        for dir_ in tqdm(
-            os.listdir(input_folderpath), desc="Processing files", unit="file"
-        ):
-            gzip_filepath = os.path.join(input_folderpath, dir_)
-            dataframe = self._parse_into_dataframe(gzip_filepath)
-            dataframe["state"] = dir_.split(".")[0].split("-")[-1]
+        logging.info("Checking for existence of file")
 
-            logging.info(f"Read {dir_} into DataFrame")
-
-            # Export to CSV
-            output_filename = "_".join([dir_.split(".")[0], output_suffix])
-            output_filepath = os.path.join(output_folderpath, output_filename)
-            export_to_csv(dataframe=dataframe, filepath=output_filepath)
-
-            if remove_gzip_flag:
-                os.remove(gzip_filepath)
-                logging.info(f"Removed file - {gzip_filepath}")
-
-    def _parse_into_dataframe(self, path: str) -> pd.DataFrame:
-        """
-        Parse a Gzip-compressed JSON file or read a Gzip-compressed CSV file
-        and convert it into a pandas DataFrame.
-
-        Args:
-            path (str): The file path to the Gzip-compressed JSON or CSV file.
-
-        Returns:
-            pd.DataFrame: A pandas DataFrame containing the data parsed from
-                the Gzip-compressed JSON file, or the data read from the
-                Gzip-compressed CSV file.
-        """
-        if path.endswith(".json.gz"):
-            return pd.DataFrame(self._parse(path))
-
-        elif path.endswith(".csv.gz"):
-            return pd.read_csv(path, compression="gzip")
-
-        else:
-            raise ValueError(
-                "Unsupported file format. Only supports Gzip-compressed files."
+        files_to_process = [
+            (
+                os.path.join(input_folderpath, dir_),
+                dir_.split(".")[0].split("-")[-1],
             )
+            for dir_ in os.listdir(input_folderpath)
+        ]
+        if not os.path.exists(output_folderpath):
+            os.mkdir(output_folderpath)
+        extracted_files = os.listdir(output_folderpath)
+        document_existence = [
+            f"{file_identifier}_{output_suffix}" in extracted_files
+            for _, file_identifier in files_to_process
+        ]
+        pairs_to_process = [
+            (gzip_filepath, file_identifier)
+            for (gzip_filepath, file_identifier), document_exists in zip(
+                files_to_process, document_existence
+            )
+            if not document_exists
+        ]
+
+        logging.info("Check completed")
+
+        with ThreadPoolExecutor(max_workers=(os.cpu_count() // 2)) as executor:
+            for batch_start in range(0, len(pairs_to_process), batch_size):
+                batch = pairs_to_process[batch_start : batch_start + batch_size]
+                futures = [
+                    executor.submit(
+                        self._parse_and_extract,
+                        gzip_filepath,
+                        output_folderpath,
+                        output_suffix,
+                        file_identifier,
+                        key_columns,
+                    )
+                    for gzip_filepath, file_identifier in batch
+                ]
+
+                for future in futures:
+                    future.result()
+
+                if remove_gzip_flag:
+                    for gzip_filepath, _ in batch:
+                        os.remove(gzip_filepath)
+                        logging.info(f"Removed file - {gzip_filepath}")
 
 
 @hydra.main(config_path="../../conf/base", config_name="pipelines.yaml")
