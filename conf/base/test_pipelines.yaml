@@ -8,7 +8,7 @@ data_downloader:
 
 data_extractor:
   input_filepath: "data/mock/mock_data.json.gz"
-  output_folder: "$data/mock/"
+  output_folder: "data/mock/"
   key_columns: ["rating", "text", "resp"]
   suffix: "extracted.json"
   expected_filepath: "data/mock/expected_data.json"
