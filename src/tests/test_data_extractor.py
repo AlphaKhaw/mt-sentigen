@@ -26,7 +26,7 @@ def config() -> DictConfig:
         job_name="test_data_extractor",
         version_base="1.1",
     ):
-        cfg = compose(config_name="test_pipelines.yaml")
+        cfg = compose(config_name="test_pipelines")
     return cfg
 
 
@@ -67,8 +67,6 @@ def test_parse_and_extract(
     # Construct output filepath
     output_filename = f"{file_identifier}_{output_suffix}"
     output_filepath = os.path.join(output_folderpath, output_filename)
-
-    print(os.listdir(os.path.join(os.getcwd(), "data")))
 
     # Read the content of the output file
     with open(output_filepath, "r") as f:

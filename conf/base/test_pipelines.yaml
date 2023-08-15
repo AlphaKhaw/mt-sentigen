@@ -4,16 +4,9 @@ data_downloader:
   use_subset: false
   use_metadata: false
 
-# data_extractor:
-#   input_filepath: "./data/mock/mock_data.json.gz"
-#   output_folder: "./data/mock/"
-#   key_columns: ["rating", "text", "resp"]
-#   suffix: "extracted.json"
-#   expected_filepath: "./data/mock/expected_data.json"
-
 data_extractor:
-  input_filepath: "${ENV:MY_INPUT_FILEPATH}"
-  output_folder: "${ENV:MY_OUTPUT_FOLDER}"
+  input_filepath: "${hydra:runtime.cwd}/data/mock/mock_data.json.gz"
+  output_folder: "${hydra:runtime.cwd}/data/mock/"
   key_columns: ["rating", "text", "resp"]
   suffix: "extracted.json"
-  expected_filepath: "${ENV:MY_EXPECTED_FILEPATH}"
+  expected_filepath: "${hydra:runtime.cwd}/data/mock/expected_data.json"
