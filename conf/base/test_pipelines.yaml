@@ -12,8 +12,8 @@ data_downloader:
 #   expected_filepath: "${hydra:runtime.cwd}/data/mock/expected_data.json"
 
 data_extractor:
-  input_filepath: "src/mock/mock_data.json.gz"
-  output_folder: "src/data/mock/"
+  input_filepath: "src/tests/mock/mock_data.json.gz"
+  output_folder: "src/tests/mock/"
   key_columns: ["rating", "text", "resp"]
   suffix: "extracted.json"
-  expected_filepath: "src/data/mock/expected_data.json"
+  expected_filepath: "src/tests/mock/expected_data.json"
