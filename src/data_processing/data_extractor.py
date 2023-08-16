@@ -112,6 +112,8 @@ class DataExtractor:
 
             logging.info(f"JSON data written to {output_filepath}")
 
+            return extracted_data
+
         except Exception as error:
             logging.info(
                 f"An error occurred while parsing file {path}: {error}"

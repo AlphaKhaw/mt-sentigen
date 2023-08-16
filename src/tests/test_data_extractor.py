@@ -53,39 +53,30 @@ def test_parse_and_extract(
     key_columns = config.data_extractor.key_columns
     output_suffix = config.data_extractor.suffix
     file_identifier = "mock_data"
-    
+
     # Read in OS Environment Variables
     input_folderpath = os.getenv("MOCK_DATAPATH")
-    print(input_folderpath)
-    
+
     # Construct input filepath
     input_filepath = os.path.join(input_folderpath, input_filename)
     output_folderpath = input_folderpath
-    
+
     # Construct expected filepath
     expected_filepath = os.path.join(output_folderpath, expected_filename)
 
     # Call test function
-    data_extractor._parse_and_extract(
+    extracted_data = data_extractor._parse_and_extract(
         input_filepath,
         output_folderpath,
         output_suffix,
         file_identifier,
         key_columns,
     )
-
-    # Construct output filepath
-    output_filename = f"{file_identifier}_{output_suffix}"
-    output_filepath = os.path.join(output_folderpath, output_filename)
-
-    # Read the content of the output file
-    # with open(output_filepath, "r") as f:
-    #     output_contents = f.read()
+    print(extracted_data)
 
     # Read the content of expected file
     with open(expected_filepath, "r") as f:
         expected_contents = f.read()
 
-    # # Assert a specific value in the output file
-    # assert expected_contents in output_contents
-    # os.remove(output_filepath)
+    # Assert a specific value in the output file
+    assert expected_contents in extracted_data
