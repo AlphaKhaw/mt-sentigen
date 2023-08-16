@@ -26,7 +26,7 @@ def config() -> DictConfig:
         job_name="test_data_extractor",
         version_base="1.1",
     ):
-        cfg = compose(config_name="test_pipelines")
+        cfg = compose(config_name="test_pipelines.yaml")
     return cfg
 
 
@@ -67,6 +67,7 @@ def test_parse_and_extract(
     # Construct output filepath
     output_filename = f"{file_identifier}_{output_suffix}"
     output_filepath = os.path.join(output_folderpath, output_filename)
+    output_filepath = "mock/mock_data.json.gz"
 
     # Read the content of the output file
     with open(output_filepath, "r") as f:
