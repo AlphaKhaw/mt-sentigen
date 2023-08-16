@@ -55,7 +55,7 @@ def test_parse_and_extract(
     file_identifier = "mock_data"
     
     # Read in OS Environment Variables
-    input_folderpath = os.getenv["MOCK_DATAPATH"]
+    input_folderpath = os.getenv("MOCK_DATAPATH")
     
     # Construct input filepath
     input_filepath = os.path.join(input_folderpath, input_filename)
