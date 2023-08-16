@@ -29,6 +29,8 @@ jobs:
         run: |
           conda run -n mt-sentigen pylint src --fail-under=6.5 --ignore=tests --disable=W1202
           conda run -n mt-sentigen pytest src/tests
+        env:
+          MOCK_DATAPATH: ${{ secrets.MOCK_DATAPATH }}
 
       - name: Clean up Conda environment
         run: |

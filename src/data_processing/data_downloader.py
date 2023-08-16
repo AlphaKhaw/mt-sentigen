@@ -1,5 +1,6 @@
 import logging
 import os
+from concurrent.futures import ThreadPoolExecutor
 
 import bs4
 import hydra
@@ -109,9 +110,10 @@ class DataDownloader:
 
         res = requests.get(url, timeout=10)
         if res.status_code == 200:
-            with open(filepath, "wb") as file:
-                file.write(res.content)
+            with ThreadPoolExecutor() as executor:
+                executor.submit(self._write_file, filepath, res.content)
             logging.info(f"Downloaded and saved to: {filepath}")
+
         else:
             logging.info(f"Failed to download the file from: {url}")
 
@@ -139,16 +141,24 @@ class DataDownloader:
         review_folderpath = os.path.join(datapath, "review")
         self._create_folders(folderpath=review_folderpath)
         review_links = [link for link in links if "review" in link]
-        for link in tqdm(review_links, desc="Downloading reviews"):
-            self._download_file(url=link, folderpath=review_folderpath)
+        with ThreadPoolExecutor() as executor:
+            for link in tqdm(review_links, desc="Downloading reviews"):
+                executor.submit(
+                    self._download_file, url=link, folderpath=review_folderpath
+                )
 
         # Download metadata
         if use_metadata:
             metadata_links = [link for link in links if "meta" in link]
             metadata_folderpath = os.path.join(datapath, "metadata")
             self._create_folders(folderpath=metadata_folderpath)
-            for link in tqdm(metadata_links, desc="Downloading metadata"):
-                self._download_file(url=link, folderpath=metadata_folderpath)
+            with ThreadPoolExecutor() as executor:
+                for link in tqdm(metadata_links, desc="Downloading metadata"):
+                    executor.submit(
+                        self._download_file,
+                        url=link,
+                        folderpath=metadata_folderpath,
+                    )
 
     def _extract_download_links(
         self, use_metadata: bool, data_table: bs4.element.Tag
@@ -204,6 +214,20 @@ class DataDownloader:
             )
 
         return data_table
+
+    def _write_file(self, filepath: str, content: bytes) -> None:
+        """
+        Write content to a file.
+
+        Args:
+            filepath (str): Path to the file.
+            content (bytes): Content to write to the file.
+
+        Returns:
+            None
+        """
+        with open(filepath, "wb") as file:
+            file.write(content)
 
 
 @hydra.main(config_path="../../conf/base", config_name="pipelines.yaml")
