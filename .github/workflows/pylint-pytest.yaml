@@ -24,8 +24,18 @@ jobs:
       - name: Install additional dependencies
         run: |
           conda install -c anaconda curl
+      
+      - name: Set secrets as environment variables
+        run: |
+          echo "export MOCK_DATAPATH=${{ secrets.MOCK_DATAPATH }}" >> $GITHUB_ENV
+      
+      - name: Debug Environment Variable
+        run: |
+          echo "MOCK_DATAPATH: $MOCK_DATAPATH"
 
       - name: Run pylint and pytest
+        env:
+          MOCK_DATAPATH: ${{ secrets.MOCK_DATAPATH }}
         run: |
           conda run -n mt-sentigen pylint src --fail-under=6.5 --ignore=tests --disable=W1202
           conda run -n mt-sentigen pytest src/tests
