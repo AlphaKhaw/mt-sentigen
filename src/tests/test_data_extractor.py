@@ -48,12 +48,21 @@ def test_parse_and_extract(
     data_extractor: DataExtractor, config: DictConfig
 ) -> None:
     # Read in test configurations
-    input_filepath = config.data_extractor.input_filepath
-    output_folderpath = config.data_extractor.output_folder
+    input_filename = config.data_extractor.input_filename
+    expected_filename = config.data_extractor.expected_filename
+    key_columns = config.data_extractor.key_columns
     output_suffix = config.data_extractor.suffix
     file_identifier = "mock_data"
-    key_columns = config.data_extractor.key_columns
-    expected_filepath = config.data_extractor.expected_filepath
+    
+    # Read in OS Environment Variables
+    input_folderpath = os.getenv["MOCK_DATAPATH"]
+    
+    # Construct input filepath
+    input_filepath = os.path.join(input_folderpath, input_filename)
+    output_folderpath = input_folderpath
+    
+    # Construct expected filepath
+    expected_filepath = os.path.join(output_folderpath, expected_filename)
 
     # Call test function
     data_extractor._parse_and_extract(
@@ -67,7 +76,6 @@ def test_parse_and_extract(
     # Construct output filepath
     output_filename = f"{file_identifier}_{output_suffix}"
     output_filepath = os.path.join(output_folderpath, output_filename)
-    output_filepath = "mock/mock_data.json.gz"
 
     # Read the content of the output file
     with open(output_filepath, "r") as f:
