@@ -2,11 +2,14 @@ import gzip
 import json
 import logging
 import os
+import random
+import re
 from typing import Any, Dict, Iterator
 
 import matplotlib.pyplot as plt
 import pandas as pd
 import requests
+import seaborn as sns
 
 logging.warnings.filterwarnings("ignore")
 logging.basicConfig(level=logging.INFO)
@@ -162,7 +165,60 @@ def map_rating_to_class(rating: float) -> str:
         return "positive"
 
 
-def create_pie_chart(dataframe: pd.DataFrame, type_flag: str):
+def read_json_file(filepath: str, sample_size: float) -> pd.DataFrame:
+    """
+    Read a JSON file and return its contents as a DataFrame.
+
+    Args:
+        filepath (str): Path to the JSON file.
+
+    Returns:
+        pd.DataFrame or None: DataFrame containing the JSON data, or None if an
+            error occurs.
+    """
+    try:
+        sampled_data = []
+        with open(filepath, "r") as json_file:
+            for line in json_file:
+                if random.random() < sample_size:
+                    sampled_data.append(json.loads(line))
+        dataframe = pd.DataFrame(sampled_data)
+        logging.info(f"Read JSON file in dataframe - {filepath}")
+        return dataframe
+
+    except Exception as e:
+        print(f"Error reading {filepath}: {e}")
+        return None
+
+
+def read_json_files(path: str, seed: int, sample_size: float) -> pd.DataFrame:
+    """
+    Read and concatenate multiple JSON files from a directory.
+
+    Args:
+        path (str): Path to the directory containing JSON files.
+        seed (int): Seed for random number generator.
+        sample_size (float): Fraction of data to sample from each JSON file.
+
+    Returns:
+        pd.DataFrame: Concatenated DataFrame containing the data from all JSON
+            files.
+    """
+    random.seed(seed)
+    dataframes = []
+    for filename in os.listdir(path):
+        if filename.endswith(".json"):
+            filepath = os.path.join(path, filename)
+            dataframe = read_json_file(
+                filepath=filepath, sample_size=sample_size
+            )
+            dataframes.append(dataframe)
+            logging.info(f"Read JSON file into dataframe - {filepath}")
+
+    return pd.concat(dataframes, ignore_index=True)
+
+
+def create_pie_chart(dataframe: pd.DataFrame, type_flag: str) -> None:
     """
     Create a pie chart visualization with percentage count based on input type
     flag:
@@ -203,4 +259,117 @@ def create_pie_chart(dataframe: pd.DataFrame, type_flag: str):
         plt.title("NaN vs Non-NaN")
 
     # Display the pie chart
+    plt.show()
+
+
+def create_bar_plot(dataframe: pd.DataFrame, column: str) -> None:
+    """
+    Create a bar chart visualisation with count of each bar.
+
+    Args:
+        dataframe (pd.DataFrame): The DataFrame containing the data.
+        column (str): Column of interest to visualise.
+
+    Returns:
+        None
+    """
+    plt.figure(figsize=(15, 6))
+
+    # Create the count plot
+    ax = sns.countplot(data=dataframe, x=column)
+
+    # Add count labels to each bar
+    for p in ax.patches:
+        ax.annotate(
+            f"{int(p.get_height())}",
+            (p.get_x() + p.get_width() / 2.0, p.get_height()),
+            ha="center",
+            va="center",
+            fontsize=10,
+            color="black",
+            xytext=(0, 5),
+            textcoords="offset points",
+        )
+
+    # Set titles
+    plt.title("Count of Ratings")
+    plt.xlabel("Rating")
+    plt.ylabel("Count")
+
+    plt.show()
+
+
+def analyse_text(
+    text_column: pd.Series, regex_dict: dict, target: str
+) -> pd.DataFrame:
+    """Analyse input text using provided regular expression patterns.
+    Returns Pandas DataFrame containing count of matches for each
+    regex pattern along with a list of the matches found for each pattern.
+
+    Args:
+        text_column (pandas.core.series.Series): Pandas series containing the
+        text to be analyzed.
+        regex_dict (dict): A dictionary containing the regex patterns to be
+        matched along with a label for each pattern.
+        target (str): Category of regular expressions.
+
+    Returns:
+        pd.DataFrame: A pandas DataFrame containing the count of matches and a
+        list of the matches found for each pattern.
+    """
+    count = {regex: 0 for regex in regex_dict}
+    matches = {regex: [] for regex in regex_dict}
+
+    for text in text_column:
+        for regex in regex_dict:
+            match = re.findall(regex_dict[regex], str(text))
+            count[regex] += len(match)
+            matches[regex].extend(match)
+
+    results = (
+        pd.DataFrame({"Count": count, "Matches": matches})
+        .reset_index(drop=False)
+        .rename(columns={"index": target})
+    )
+
+    return results
+
+
+def visualise_regex_results(results: pd.DataFrame) -> None:
+    """
+    Visualize the distribution of regex results using a bar plot.
+
+    Args:
+        results (pd.DataFrame): DataFrame containing regex results with columns
+            'Regex' and 'Count'.
+
+    Returns:
+        None
+    """
+    _, axis = plt.subplots(figsize=(15, 6))
+
+    results.sort_values(by=["Count"], ascending=True, inplace=True)
+    sns.barplot(
+        data=results,
+        x="Regex",
+        y="Count",
+    )
+
+    # Set overall title
+    plt.suptitle("Distribution of Results", fontsize=18, fontweight="bold")
+
+    # Display respective bar count
+    for p in axis.patches:
+        axis.annotate(
+            f"{int(p.get_height())}",
+            (p.get_x() + p.get_width() / 2.0, p.get_height()),
+            ha="center",
+            va="center",
+            fontsize=10,
+            color="black",
+            xytext=(0, 5),
+            textcoords="offset points",
+        )
+
+    # Display visualisation
     plt.show()
