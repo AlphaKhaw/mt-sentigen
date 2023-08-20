@@ -47,13 +47,16 @@ def export_dataframe(dataframe: pd.DataFrame, output_filepath: str) -> None:
         filepath.parents[0].mkdir(parents=True, exist_ok=True)
 
         if output_filepath.endswith(".csv"):
-            csv_kwargs = {
-                "filename": filepath,
-                "single_file": True,
-                "index": False,
-                "escapechar": "\\",
-            }
-            dataframe.to_csv(**csv_kwargs)
+            if isinstance(dataframe, pd.core.frame.DataFrame):
+                dataframe.to_csv(output_filepath, index=False)
+            else:
+                csv_kwargs = {
+                    "filename": filepath,
+                    "single_file": True,
+                    "index": False,
+                    "escapechar": "\\",
+                }
+                dataframe.to_csv(**csv_kwargs)
             logging.info(f"Exported CSV file: {filepath}")
 
         elif output_filepath.endswith(".parquet"):

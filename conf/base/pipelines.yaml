@@ -37,3 +37,13 @@ data_processor:
 
     # Replace two or more consecutive spaces with a single space
     '\s+': ' '
+
+data_splitter:
+  input_filepath: "${data_processor.output_folder}/${data_processor.suffix}"
+  output_folder: "${hydra:runtime.cwd}/data/split"
+  suffix: ["train.csv", "val.csv", "test.csv"]
+  train_ratio: 0.6
+  val_ratio: 0.2
+  test_ratio: 0.2
+  seed: 42
+  split_tolerance: 0.01
