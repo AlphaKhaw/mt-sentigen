@@ -245,9 +245,7 @@ class DataProcessor:
             elif filename.endswith(".parquet"):
                 processed_dataframes.append(dd.read_parquet(filepath))
 
-        processed_dataframe = dd.concat(
-            processed_dataframes, ignore_index=True
-        )
+        processed_dataframe = dd.concat(processed_dataframes, ignore_index=True)
         return processed_dataframe
 
     def _read_json_files(self, path: str, files: list) -> dd.DataFrame:
