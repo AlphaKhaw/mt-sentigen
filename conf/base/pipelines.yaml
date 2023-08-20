@@ -21,9 +21,9 @@ data_extractor:
 
 data_processor:
   input_folder: "${data_extractor.output_folder}/${general.review_col}"
-  # input_folder: "${hydra:runtime.cwd}/data/test/review"
   output_folder: "${hydra:runtime.cwd}/data/processed"
-  suffix: "processed.csv"
+  suffix: "processed.csv" # "processed.parquet"
+  batch_to_process: 3
   remove_json_files: false
   regex_pattern:
     # Remove special characters except for punctuations
@@ -36,4 +36,4 @@ data_processor:
     '\b\d{9,}\b': ''
 
     # Replace two or more consecutive spaces with a single space
-    '[^\S\r\n]{2,}': ' '
+    '\s+': ' '
