@@ -30,20 +30,40 @@ def read_from_csv(filepath: str) -> pd.DataFrame:
     return dataframe
 
 
-def export_to_csv(dataframe: pd.DataFrame, filepath: str) -> None:
+def export_dataframe(dataframe: pd.DataFrame, output_filepath: str) -> None:
     """
-    Export the DataFrame to a CSV file without index in the
+    Export the DataFrame to a CSV or Parquet file without index in the
     specified folder path.
 
     Args:
         dataframe (pd.DataFrame): The DataFrame to be exported as a CSV file.
-        filename (str): The file name of exported CSV file.
-    """
-    file_path = Path(filepath)
+        output_filepath (str): The file name of exported CSV file.
 
+    Returns:
+        None
+    """
     try:
-        file_path.parents[0].mkdir(parents=True, exist_ok=True)
-        dataframe.to_csv(file_path, index=False, escapechar="\\")
-        logging.info(f"Export CSV to {file_path}")
+        filepath = Path(output_filepath)
+        filepath.parents[0].mkdir(parents=True, exist_ok=True)
+
+        if output_filepath.endswith(".csv"):
+            csv_kwargs = {
+                "filename": filepath,
+                "single_file": True,
+                "index": False,
+                "escapechar": "\\",
+            }
+            dataframe.to_csv(**csv_kwargs)
+            logging.info(f"Exported CSV file: {filepath}")
+
+        elif output_filepath.endswith(".parquet"):
+            parquet_kwargs = {"path": filepath, "write_metadata_file": True}
+            dataframe.to_parquet(**parquet_kwargs)
+            logging.info(f"Exported Parquet file: {filepath}")
+
+        else:
+            raise ValueError("Output format currently not supported")
+
     except Exception as error:
-        raise error
+        logging.error(f"An error occurred while exporting: {error}")
+        raise

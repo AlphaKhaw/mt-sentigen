@@ -18,3 +18,4 @@ dependencies:
   - seaborn=0.12.2
   - matplotlib=3.7.2
   - ujson=5.7.0
+  - dask=2023.8.0

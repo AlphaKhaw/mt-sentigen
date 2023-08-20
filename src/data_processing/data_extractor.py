@@ -218,7 +218,7 @@ def run(cfg: DictConfig) -> str:
         cfg (DictConfig): Hydra configuration.
 
     Returns:
-        str: Status of DataDownloader class.
+        str: Status of DataExtractor class.
     """
     extractor = DataExtractor(cfg)
     extractor.extract_data()

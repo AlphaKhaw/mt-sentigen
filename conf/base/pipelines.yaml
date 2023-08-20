@@ -1,6 +1,9 @@
 general:
   review_col: "review"
   metadata_col: "meta"
+  rating_column: "rating"
+  response_column: "resp"
+  review_column: "text"
 
 data_downloader:
   base_url: "https://datarepo.eng.ucsd.edu/mcauley_group/gdrive/googlelocal/"
@@ -15,3 +18,22 @@ data_extractor:
   suffix: "extracted.json"
   batch_size: 5
   remove_gzip_files: false
+
+data_processor:
+  input_folder: "${data_extractor.output_folder}/${general.review_col}"
+  output_folder: "${hydra:runtime.cwd}/data/processed"
+  suffix: "processed.csv" # "processed.parquet"
+  batch_to_process: 3
+  remove_json_files: false
+  regex_pattern:
+    # Remove special characters except for punctuations
+    '[^A-Za-z0-9\s.,!?]': ''
+
+    # Remove any http or https links
+    '(?:https?)\S+': ''
+
+    # Remove any potential contact numbers
+    '\b\d{9,}\b': ''
+
+    # Replace two or more consecutive spaces with a single space
+    '\s+': ' '
