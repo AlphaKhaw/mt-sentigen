@@ -45,14 +45,25 @@ def export_dataframe(dataframe: pd.DataFrame, output_filepath: str) -> None:
     try:
         filepath = Path(output_filepath)
         filepath.parents[0].mkdir(parents=True, exist_ok=True)
-        if output_filepath.split(".")[-1] == "csv":
-            dataframe.to_csv(filepath, index=False)
-            logging.info(f"Export CSV file - {filepath}")
-        elif output_filepath.split(".")[-1] == "parquet":
-            dataframe.to_parquet(filepath, index=False)
-            logging.info(f"Export Parquet file - {filepath}")
+
+        if output_filepath.endswith(".csv"):
+            csv_kwargs = {
+                "filename": filepath,
+                "single_file": True,
+                "index": False,
+                "escapechar": "\\",
+            }
+            dataframe.to_csv(**csv_kwargs)
+            logging.info(f"Exported CSV file: {filepath}")
+
+        elif output_filepath.endswith(".parquet"):
+            parquet_kwargs = {"path": filepath, "write_metadata_file": True}
+            dataframe.to_parquet(**parquet_kwargs)
+            logging.info(f"Exported Parquet file: {filepath}")
+
         else:
-            raise "Output format currently not supported"
+            raise ValueError("Output format currently not supported")
 
     except Exception as error:
-        raise error
+        logging.error(f"An error occurred while exporting: {error}")
+        raise
