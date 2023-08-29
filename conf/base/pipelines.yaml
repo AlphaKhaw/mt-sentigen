@@ -47,3 +47,9 @@ data_splitter:
   test_ratio: 0.2
   seed: 42
   split_tolerance: 0.01
+
+dataloader:
+  input_folder: "${data_splitter.output_folder}"
+  batch_size: 32
+  encoder_model: "roberta-large"
+  decoder_model: "microsoft/DialoGPT-large"
