@@ -25,3 +25,4 @@ dependencies:
   - sentencepiece=0.1.99
   - nltk=3.8.1
   - rouge-score=0.1.2
+  - tensorboard=2.14.0
