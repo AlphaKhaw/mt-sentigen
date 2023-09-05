@@ -68,7 +68,7 @@ def predict_one(
     return sentiment_class, generated_text
 
 
-def predict_many(
+def predict(
     model: MultitaskModelWithT5,
     tokenizer: AutoTokenizer,
     input_texts: List[str],
