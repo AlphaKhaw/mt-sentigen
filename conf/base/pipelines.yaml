@@ -47,3 +47,37 @@ data_splitter:
   test_ratio: 0.2
   seed: 42
   split_tolerance: 0.01
+
+dataloader:
+  input_folder: "${data_splitter.output_folder}"
+  batch_size: 32
+  max_length: 64
+  encoder_model: "roberta-large"
+  decoder_model: "microsoft/DialoGPT-medium"
+  encoder_decoder_model: "t5-base"
+
+modelling:
+  general:
+    checkpoint_path: "${hydra:runtime.cwd}/models"
+    device: "mps"
+    epochs: 10
+    patience: 3
+    gradient_clipping_threshold: 0.1
+    random_seed: 42
+
+  model:
+    encoder: "${dataloader.encoder_model}"
+    decoder: "${dataloader.decoder_model}"
+    encoder_decoder: "${dataloader.encoder_decoder_model}"
+    sentiment_classes: 3
+
+  loss_weights:
+    sentiment_loss_weightage: 1.0
+    response_loss_weightage: 1.0
+
+  optimizer:
+    learning_rate: 1e-4
+
+  scheduler:
+    factor: 0.1
+    patience: 5
