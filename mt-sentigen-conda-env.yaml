@@ -1,6 +1,5 @@
 name: mt-sentigen
 channels:
-  - defaults
   - conda-forge
 dependencies:
   - python=3.10.12
