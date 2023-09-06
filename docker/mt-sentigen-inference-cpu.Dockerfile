@@ -1,42 +1,34 @@
-FROM python:3.10-slim-buster
+# Use the latest Ubuntu base image
+FROM ubuntu:latest
 
-# Setup shell
-SHELL ["/bin/bash", "-c"]
+# Set environment variables to non-interactive (this prevents some prompts)
+ENV DEBIAN_FRONTEND=noninteractive
 
-# Arguments and Environment Variables
-ARG CONDA_ENV_FILE="inference-conda-env.yaml"
-ARG HOME_DIR="/app"
-
-# Install system packages and clean up
+# Install some basic utilities and Python
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends curl && \
+    apt-get install -y --no-install-recommends \
+    curl \
+    python3.10 \
+    python3-pip && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-# Working directory
-WORKDIR $HOME_DIR
+# Set working directory
+WORKDIR /app
 
-# Install Miniconda
-RUN curl -O https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh && \
-    chmod +x Miniconda3-latest-Linux-x86_64.sh && \
-    ./Miniconda3-latest-Linux-x86_64.sh -u -b -p /miniconda3 && \
-    rm Miniconda3-latest-Linux-x86_64.sh
-
-# Conda settings
-ENV PATH /miniconda3/bin:$PATH
-
-# Conda environment setup
-COPY $CONDA_ENV_FILE .
-RUN conda env create -f $CONDA_ENV_FILE
+# Copy requirements.txt and install dependencies
+COPY ./requirements.txt /app/
+RUN pip3 install --no-cache-dir -r /app/requirements.txt
 
 # Copy only the necessary files
 COPY ./models /app/models
 COPY ./src/fastapi/main.py /app/src/fastapi/main.py
 COPY ./src/model /app/src/model
+COPY ./src/training/inference.py /app/src/training/inference.py
+COPY ./conf/base/pipelines.yaml /app/conf/base/pipelines.yaml
 
-# Expose the port
+# Expose the port your app runs on
 EXPOSE 8000
 
-# Set the entry point
-SHELL ["conda", "run", "-n", "mt-sentigen", "/bin/bash", "-c"]
+# Use CMD to run the FastAPI application
 CMD ["uvicorn", "src.fastapi.main:app", "--host", "0.0.0.0", "--port", "8000"]
