@@ -3,6 +3,7 @@ import os
 import sys
 from typing import Union
 
+import torch
 import uvicorn
 import yaml
 from omegaconf import DictConfig
@@ -41,6 +42,10 @@ def config() -> DictConfig:
 # Initialize FastAPI
 app = FastAPI()
 
+# Check for CUDA availability
+use_cuda = torch.cuda.is_available()
+device = torch.device("cuda" if use_cuda else "cpu")
+
 
 class TextItems(BaseModel):
     """
@@ -65,7 +70,7 @@ def startup_event():
         model = app.cfg["dataloader"]["encoder_decoder_model"]
         app.model = T5ForConditionalGeneration.from_pretrained(
             model_weights_path
-        )
+        ).to(device)
         app.tokenizer = AutoTokenizer.from_pretrained(model)
         logging.info("Start server complete")
     except Exception as e:
