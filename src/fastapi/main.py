@@ -1,7 +1,7 @@
 import logging
 import os
 import sys
-from typing import Union
+from typing import List, Union
 
 import torch
 import uvicorn
@@ -56,7 +56,7 @@ class TextItems(BaseModel):
             or a list of strings.
     """
 
-    texts: Union[str, list[str]]
+    texts: Union[str, List[str]]
 
 
 @app.on_event("startup")
