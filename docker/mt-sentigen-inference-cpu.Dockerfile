@@ -24,7 +24,7 @@ RUN pip3 install --no-cache-dir -r /app/requirements.txt
 COPY ./models /app/models
 COPY ./src/fastapi/main.py /app/src/fastapi/main.py
 COPY ./src/model /app/src/model
-COPY ./src/training/inference.py /app/src/training/inference.py
+COPY ./src/inference/inference.py /app/src/inference/inference.py
 COPY ./conf/base/pipelines.yaml /app/conf/base/pipelines.yaml
 
 # Expose the port your app runs on
