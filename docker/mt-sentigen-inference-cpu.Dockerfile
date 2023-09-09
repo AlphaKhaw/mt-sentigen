@@ -17,8 +17,8 @@ RUN apt-get update && \
 WORKDIR /app
 
 # Copy requirements.txt and install dependencies
-COPY ./cpu-inference-requirements.txt /app/
-RUN pip3 install --no-cache-dir -r /app/cpu-inference-requirements.txt
+COPY ./requirements.txt /app/
+RUN pip3 install --no-cache-dir -r /app/requirements.txt
 
 # Copy only the necessary files
 COPY ./models /app/models
