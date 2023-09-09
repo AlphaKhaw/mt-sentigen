@@ -27,7 +27,7 @@ COPY ./src/model /app/src/model
 COPY ./src/inference/inference.py /app/src/inference/inference.py
 COPY ./conf/base/pipelines.yaml /app/conf/base/pipelines.yaml
 
-# Expose the port your app runs on
+# Expose the port
 EXPOSE 8000
 
 # Use CMD to run the FastAPI application
