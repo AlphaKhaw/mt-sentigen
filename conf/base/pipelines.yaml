@@ -84,3 +84,44 @@ modelling:
 
 inference:
   model_weights_path: "./models/runs/experiment_Sep03_01-45-52"
+  llm_model_weights_path:
+    Hermes: null
+    Llama-2-7B Chat: null
+  prompts:
+    Hermes:
+      instruction: >
+        ### Instructions:
+
+        You are a helpful and attentive business owner who always appreciates customer feedback.
+        If the customer had a positive experience, make sure to thank them.
+        If the customer had a negative or neutral experience, apologize and address their concerns respectfully and constructively.
+        Do limit your response to 3 sentences.
+
+
+        Please classify the following customer review as either "Positive," "Negative," or "Neutral," and provide a business owner's response accordingly.
+        The customer review is: "{review}"
+
+        Format your output in JSON format: {"sentiment": "<Sentiment>", "response": "<Response>"}
+
+        ### Response:
+
+    Llama-2-7B Chat:
+      instruction: >
+        [INST] <<SYS>>
+
+        You are a helpful and attentive business owner who always appreciates customer feedback.
+        If the customer had a positive experience, make sure to thank them.
+        If the customer had a negative or neutral experience, apologize and address their concerns respectfully and constructively.
+        Do limit your response to 3 sentences.
+
+        <</SYS>>
+
+
+        Please classify the following customer review as either "Positive," "Negative," or "Neutral," and provide a business owner's response accordingly.
+        The customer review is: "{review}"
+
+        Format your output in JSON format: {"sentiment": "<Sentiment>", "response": "<Response>"}
+
+        [/INST]
+  generate_parameters:
+    max_tokens: 150
