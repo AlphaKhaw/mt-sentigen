@@ -6,6 +6,7 @@ from typing import Any, List
 import pandas as pd
 import uvicorn
 import yaml
+from colorama import Fore, Style, init
 from gpt4all import GPT4All
 from pydantic import BaseModel
 
@@ -17,8 +18,14 @@ sys.path.append(f"{os.path.dirname(os.path.abspath(__file__))}/../")
 
 from inference.llm_inference import predict
 
+init(autoreset=True)
+
 logging.warnings.filterwarnings("ignore")
 logging.basicConfig(level=logging.INFO)
+
+
+def custom_log(msg: str, color: str):
+    logging.info(color + msg + Style.RESET_ALL)
 
 
 def config() -> dict:
@@ -108,9 +115,13 @@ async def predict_one(request: PredictOneRequest) -> Any:
         )
 
     cfg = config()
-    logging.info("Initialized config")
     prediction = predict(model, model_name, text, cfg, is_single_input=True)
-    logging.info(prediction)
+    for review in prediction:
+        custom_log(f"Review: {review}", Fore.BLUE)
+        custom_log(f"Sentiment: {prediction[review]['sentiment']}", Fore.GREEN)
+        custom_log(
+            f"Generated Response: {prediction[review]['response']}", Fore.GREEN
+        )
     return jsonable_encoder(prediction)
 
 
@@ -141,6 +152,12 @@ async def predict_multiple(request: PredictMultipleRequest) -> Any:
 
     cfg = config()
     predictions = predict(model, model_name, texts, cfg, is_single_input=False)
+    for review in predictions:
+        custom_log(f"Review: {review}", Fore.BLUE)
+        custom_log(f"Sentiment: {predictions[review]['sentiment']}", Fore.GREEN)
+        custom_log(
+            f"Generated Response: {predictions[review]['response']}", Fore.GREEN
+        )
     return jsonable_encoder(predictions)
 
 
@@ -174,6 +191,15 @@ async def predict_csv(
     predictions_dict = predict(
         model, model_name, df["text"].tolist(), cfg, is_single_input=False
     )
+    for review in predictions_dict:
+        custom_log(f"Review: {review}", Fore.BLUE)
+        custom_log(
+            f"Sentiment: {predictions_dict[review]['sentiment']}", Fore.GREEN
+        )
+        custom_log(
+            f"Generated Response: {predictions_dict[review]['response']}",
+            Fore.GREEN,
+        )
     df["predictions"] = df["text"].map(predictions_dict)
     df.to_csv("predicted.csv", index=False)
     return FileResponse("predicted.csv")
