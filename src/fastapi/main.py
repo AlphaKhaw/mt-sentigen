@@ -14,7 +14,7 @@ from fastapi import FastAPI, HTTPException
 
 sys.path.append(f"{os.path.dirname(os.path.abspath(__file__))}/../")
 
-from training.inference import predict, predict_one
+from inference.inference import predict, predict_one
 
 logging.warnings.filterwarnings("ignore")
 logging.basicConfig(level=logging.INFO)
