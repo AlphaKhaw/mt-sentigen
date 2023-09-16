@@ -86,7 +86,10 @@ inference:
   model_weights_path: "./models/runs/experiment_Sep03_01-45-52"
   llm_model_weights_path:
     Hermes: null
-    Llama-2-7B Chat: null
+    Llama-2-7B Chat: "./models/llama-2-7b-chat.Q4_K_M.gguf"
+  model_parameters:
+    verbose: true
+    n_ctx: 2048
   prompts:
     Hermes:
       instruction: >
@@ -107,21 +110,24 @@ inference:
 
     Llama-2-7B Chat:
       instruction: >
-        [INST] <<SYS>>
+          [INST] <<SYS>>
+          You are a helpful and attentive business owner who always appreciates customer feedback.
+          If the customer had a positive experience, make sure to thank them.
+          If the customer had a negative or neutral experience, apologize and address their concerns respectfully and constructively.
+          Additionally, try to identify any potential improvements or criticisms mentioned in the review.
+          Do limit your response to 3 sentences.
 
-        You are a helpful and attentive business owner who always appreciates customer feedback.
-        If the customer had a positive experience, make sure to thank them.
-        If the customer had a negative or neutral experience, apologize and address their concerns respectfully and constructively.
-        Do limit your response to 3 sentences.
+          <</SYS>>
 
-        <</SYS>>
+          Please classify the following customer review as either "Positive," "Negative," or "Neutral.". Then, provide a business owner's response accordingly.
+          Also, explicitly identify any potential improvements or criticisms mentioned in the review, filling them in the corresponding fields.
+          If none are mentioned, write "None" for each field.
+          The customer review is: "{review}"
 
+          Strictly format and return your output in the following JSON format: {"sentiment": "<Sentiment>", "response": "<Response>", "improvements": "<Improvements>", "criticisms": "<Criticisms>"}
 
-        Please classify the following customer review as either "Positive," "Negative," or "Neutral," and provide a business owner's response accordingly.
-        The customer review is: "{review}"
+          [/INST]
 
-        Format your output in JSON format: {"sentiment": "<Sentiment>", "response": "<Response>"}
-
-        [/INST]
   generate_parameters:
     max_tokens: 150
+    max_attempts: 3

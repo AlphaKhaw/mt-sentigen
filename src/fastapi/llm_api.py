@@ -7,10 +7,10 @@ import pandas as pd
 import uvicorn
 import yaml
 from colorama import Fore, Style, init
-from gpt4all import GPT4All
+from llama_cpp import Llama
 from pydantic import BaseModel
 
-from fastapi import FastAPI, File, HTTPException, Query, UploadFile
+from fastapi import FastAPI, File, HTTPException, UploadFile
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import FileResponse
 
@@ -25,6 +25,13 @@ logging.basicConfig(level=logging.INFO)
 
 
 def custom_log(msg: str, color: str):
+    """
+    Custom logging function with Colorama.
+
+    Args:
+        msg (str): Input logging message.
+        color (str): Input color of text.
+    """
     logging.info(color + msg + Style.RESET_ALL)
 
 
@@ -51,12 +58,10 @@ app = FastAPI()
 
 class PredictOneRequest(BaseModel):
     text: str
-    model_name: str
 
 
 class PredictMultipleRequest(BaseModel):
     texts: List[str]
-    model_name: str
 
 
 @app.on_event("startup")
@@ -65,19 +70,15 @@ async def load_model() -> None:
     Load all the models into memory during application startup.
     """
     cfg = config()
-    global MODELS
-    MODELS = {
-        "Hermes": GPT4All(
-            model_name="nous-hermes-13b.ggmlv3.q4_0.bin",
-            model_path=cfg["llm_model_weights_path"]["Hermes"],
-            allow_download=False,
-        ),
-        "Llama-2-7B Chat": GPT4All(
-            model_name="llama-2-7b-chat.ggmlv3.q4_0.bin",
-            model_path=cfg["llm_model_weights_path"]["Llama-2-7B Chat"],
-            allow_download=False,
-        ),
-    }
+    logging.info(cfg["llm_model_weights_path"]["Llama-2-7B Chat"])
+    global MODEL
+    MODEL = Llama(
+        cfg["llm_model_weights_path"]["Llama-2-7B Chat"],
+        verbose=cfg["model_parameters"]["verbose"],
+        n_ctx=cfg["model_parameters"]["n_ctx"],
+    )
+    if MODEL is None:
+        raise HTTPException(status_code=404, detail="Model weights not found")
 
 
 @app.get("/")
@@ -103,24 +104,25 @@ async def predict_one(request: PredictOneRequest) -> Any:
         Any: The predicted output, encoded as a JSON-compatible object.
     """
     text = request.text
-    model_name = request.model_name
 
     if not text:
         raise HTTPException(status_code=400, detail="Empty text input")
 
-    model = MODELS.get(model_name)
-    if model is None:
-        raise HTTPException(
-            status_code=404, detail=f"Model {model_name} not found"
-        )
-
     cfg = config()
-    prediction = predict(model, model_name, text, cfg, is_single_input=True)
+    prediction = predict(MODEL, [text], cfg)
     for review in prediction:
-        custom_log(f"Review: {review}", Fore.BLUE)
+        custom_log(f"\nReview: {review}", Fore.BLUE)
         custom_log(f"Sentiment: {prediction[review]['sentiment']}", Fore.GREEN)
         custom_log(
             f"Generated Response: {prediction[review]['response']}", Fore.GREEN
+        )
+        custom_log(
+            f"Improvements: {prediction[review]['improvements']}",
+            Fore.GREEN,
+        )
+        custom_log(
+            f"Criticisms: {prediction[review]['criticisms']}\n",
+            Fore.GREEN,
         )
     return jsonable_encoder(prediction)
 
@@ -137,34 +139,33 @@ async def predict_multiple(request: PredictMultipleRequest) -> Any:
         Any: The predicted outputs, encoded as a JSON-compatible object.
     """
     texts = request.texts
-    model_name = request.model_name
 
     if not texts or any(not t for t in texts):
         raise HTTPException(
             status_code=400, detail="Empty or invalid text inputs"
         )
 
-    model = MODELS.get(model_name)
-    if model is None:
-        raise HTTPException(
-            status_code=404, detail=f"Model {model_name} not found"
-        )
-
     cfg = config()
-    predictions = predict(model, model_name, texts, cfg, is_single_input=False)
+    predictions = predict(MODEL, texts, cfg)
     for review in predictions:
-        custom_log(f"Review: {review}", Fore.BLUE)
+        custom_log(f"\nReview: {review}", Fore.BLUE)
         custom_log(f"Sentiment: {predictions[review]['sentiment']}", Fore.GREEN)
         custom_log(
             f"Generated Response: {predictions[review]['response']}", Fore.GREEN
+        )
+        custom_log(
+            f"Improvements: {predictions[review]['improvements']}",
+            Fore.GREEN,
+        )
+        custom_log(
+            f"Criticisms: {predictions[review]['criticisms']}\n",
+            Fore.GREEN,
         )
     return jsonable_encoder(predictions)
 
 
 @app.post("/predict_csv/")
-async def predict_csv(
-    file: UploadFile = File(...), model_name: str = Query(...)
-) -> FileResponse:
+async def predict_csv(file: UploadFile = File(...)) -> FileResponse:
     """
     Make predictions based on a CSV file containing multiple text inputs.
 
@@ -181,18 +182,10 @@ async def predict_csv(
             status_code=400, detail="CSV contains empty text fields"
         )
 
-    model = MODELS.get(model_name)
-    if model is None:
-        raise HTTPException(
-            status_code=404, detail=f"Model {model_name} not found"
-        )
-
     cfg = config()
-    predictions_dict = predict(
-        model, model_name, df["text"].tolist(), cfg, is_single_input=False
-    )
+    predictions_dict = predict(MODEL, df["text"].tolist(), cfg)
     for review in predictions_dict:
-        custom_log(f"Review: {review}", Fore.BLUE)
+        custom_log(f"\nReview: {review}", Fore.BLUE)
         custom_log(
             f"Sentiment: {predictions_dict[review]['sentiment']}", Fore.GREEN
         )
@@ -200,9 +193,15 @@ async def predict_csv(
             f"Generated Response: {predictions_dict[review]['response']}",
             Fore.GREEN,
         )
-    df["predictions"] = df["text"].map(predictions_dict)
-    df.to_csv("predicted.csv", index=False)
-    return FileResponse("predicted.csv")
+        custom_log(
+            f"Improvements: {predictions_dict[review]['improvements']}",
+            Fore.GREEN,
+        )
+        custom_log(
+            f"Criticisms: {predictions_dict[review]['criticisms']}\n",
+            Fore.GREEN,
+        )
+    return jsonable_encoder(predictions_dict)
 
 
 if __name__ == "__main__":
