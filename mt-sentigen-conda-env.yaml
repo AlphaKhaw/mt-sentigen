@@ -23,3 +23,9 @@ dependencies:
   - sentencepiece=0.1.99
   - tensorboard=2.14.0
   - torchmetrics=1.1.1
+  - textstat=0.7.2
+  - colorama=0.4.6
+  - pip:
+    - gpt4all==1.0.9
+    - text-generation==0.6.0
+    - llama-cpp-python==0.1.84
