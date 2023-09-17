@@ -133,4 +133,4 @@ inference:
     max_attempts: 3
 
 streamlit:
-  fastapi_endpoint: "http://13.229.231.195:8000"
+  fastapi_endpoint: "http://0.0.0.0:8000"
