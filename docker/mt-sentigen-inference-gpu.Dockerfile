@@ -17,7 +17,7 @@ RUN apt-get update && \
 WORKDIR /app
 
 # Copy requirements.txt and install dependencies
-COPY ./gpu-inference-requirements.txt /app/requirements.txt
+COPY ./requirements/gpu-inference-requirements.txt /app/requirements.txt
 RUN pip3 install --no-cache-dir -r /app/requirements.txt
 
 # Copy only the necessary files
