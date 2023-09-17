@@ -2,6 +2,8 @@
 
 ## End-Product: `AI-Driven Customer Review Analysis`
 
+![Screenshot 2023-09-17 at 2 51 03 PM](https://github.com/AlphaKhaw/mt-sentigen/assets/87654386/2834b1ae-5ad0-4150-a688-acadc90ab2db)
+
 ### **Objective**
 
 The `AI-Driven Customer Review Analysis` system serves as a comprehensive tool designed for businesses, researchers, and analysts who are keen on understanding customer sentiments and feedback. It goes beyond traditional text analytics by leveraging state-of-the art Large Language Models (LLM) to provide not only sentiment scores but also context-rich analyses as well as automated responses generation. This includes extracting potential areas for improvement and noteworthy criticisms from raw customer reviews.
@@ -20,10 +22,6 @@ Efficiently manage response to reviews and maintain brand voice.
 
 **4. User-friendly Interface:**
 Provides a straightforward and accessible UI where even non-technical users can input data as plain text or upload in CSV format for bulk processing.
-
-
-![Alt text](<Screenshot 2023-09-17 at 2.51.03 PM.png>)
-
 
 ### Who Should Use This?
 
