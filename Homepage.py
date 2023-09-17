@@ -61,9 +61,8 @@ def homepage():
         1. **Model Selection**: Choose the machine learning model you want to
         use.
         2. **Input Reviews**: Submit the customer reviews you want to analyze.
-        3. **Results**: View the analysis results for each review.
-        4. **Export Results**: Download the analysis results for further review
-        or sharing.
+        3. **Results**: View the analysis results for each review. Download the
+        results for further review or sharing.
 
         Navigate through these steps using the sidebar.👈
         """

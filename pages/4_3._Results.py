@@ -27,4 +27,10 @@ def results_page():
 
 
 if __name__ == "__main__":
+    # Page Configurations
+    st.set_page_config(
+        page_title="AI-Driven Customer Review Analysis",
+        layout="wide",
+    )
+
     results_page()

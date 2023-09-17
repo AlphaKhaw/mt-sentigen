@@ -127,6 +127,12 @@ def test_api_endpoint(endpoint: str):
 
 
 if __name__ == "__main__":
+    # Page Configurations
+    st.set_page_config(
+        page_title="AI-Driven Customer Review Analysis",
+        layout="wide",
+    )
+
     with open("conf/base/pipelines.yaml", "r") as stream:
         try:
             cfg = yaml.safe_load(stream)
