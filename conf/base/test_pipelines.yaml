@@ -1,0 +1,11 @@
+data_downloader:
+  base_url: "https://datarepo.eng.ucsd.edu/mcauley_group/gdrive/googlelocal/"
+  output_folder: "${hydra:runtime.cwd}/data/gzip"
+  use_subset: false
+  use_metadata: false
+
+data_extractor:
+  input_filename: "mock_data.json.gz"
+  expected_filename: "expected_data.json"
+  key_columns: ["rating", "text", "resp"]
+  suffix: "extracted.json"

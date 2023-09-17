@@ -1,0 +1,136 @@
+general:
+  review_col: "review"
+  metadata_col: "meta"
+  rating_column: "rating"
+  response_column: "resp"
+  review_column: "text"
+
+data_downloader:
+  base_url: "https://datarepo.eng.ucsd.edu/mcauley_group/gdrive/googlelocal/"
+  output_folder: "${hydra:runtime.cwd}/data/gzip"
+  use_subset: true
+  use_metadata: false
+
+data_extractor:
+  input_folder: "${data_downloader.output_folder}"
+  output_folder: "${hydra:runtime.cwd}/data/extracted"
+  key_columns: ["rating", "text", "resp"]
+  suffix: "extracted.json"
+  batch_size: 5
+  remove_gzip_files: false
+
+data_processor:
+  input_folder: "${data_extractor.output_folder}/${general.review_col}"
+  output_folder: "${hydra:runtime.cwd}/data/processed"
+  suffix: "processed.csv" # "processed.parquet"
+  batch_to_process: 3
+  remove_json_files: false
+  regex_pattern:
+    # Remove special characters except for punctuations
+    '[^A-Za-z0-9\s.,!?]': ''
+
+    # Remove any http or https links
+    '(?:https?)\S+': ''
+
+    # Remove any potential contact numbers
+    '\b\d{9,}\b': ''
+
+    # Replace two or more consecutive spaces with a single space
+    '\s+': ' '
+
+data_splitter:
+  input_filepath: "${data_processor.output_folder}/${data_processor.suffix}"
+  output_folder: "${hydra:runtime.cwd}/data/split"
+  suffix: ["train.csv", "val.csv", "test.csv"]
+  train_ratio: 0.6
+  val_ratio: 0.2
+  test_ratio: 0.2
+  seed: 42
+  split_tolerance: 0.01
+
+dataloader:
+  input_folder: "${data_splitter.output_folder}"
+  batch_size: 32
+  max_length: 64
+  encoder_model: "roberta-large"
+  decoder_model: "microsoft/DialoGPT-medium"
+  encoder_decoder_model: "t5-base"
+
+modelling:
+  general:
+    checkpoint_path: "${hydra:runtime.cwd}/models"
+    device: "mps"
+    epochs: 10
+    patience: 3
+    gradient_clipping_threshold: 0.1
+    random_seed: 42
+
+  model:
+    encoder: "${dataloader.encoder_model}"
+    decoder: "${dataloader.decoder_model}"
+    encoder_decoder: "${dataloader.encoder_decoder_model}"
+    sentiment_classes: 3
+
+  loss_weights:
+    sentiment_loss_weightage: 1.0
+    response_loss_weightage: 1.0
+
+  optimizer:
+    learning_rate: 1e-4
+
+  scheduler:
+    factor: 0.1
+    patience: 5
+
+inference:
+  model_weights_path: "./models/runs/experiment_Sep03_01-45-52"
+  llm_model_weights_path:
+    Hermes: null
+    Llama-2-7B Chat: "./models/llama-2-7b-chat.Q4_K_M.gguf"
+  model_parameters:
+    verbose: true
+    n_ctx: 2048
+  prompts:
+    Hermes:
+      instruction: >
+        ### Instructions:
+
+        You are a helpful and attentive business owner who always appreciates customer feedback.
+        If the customer had a positive experience, make sure to thank them.
+        If the customer had a negative or neutral experience, apologize and address their concerns respectfully and constructively.
+        Do limit your response to 3 sentences.
+
+
+        Please classify the following customer review as either "Positive," "Negative," or "Neutral," and provide a business owner's response accordingly.
+        The customer review is: "{review}"
+
+        Format your output in JSON format: {"sentiment": "<Sentiment>", "response": "<Response>"}
+
+        ### Response:
+
+    Llama-2-7B Chat:
+      instruction: >
+          [INST] <<SYS>>
+          You are a helpful and attentive business owner who always appreciates customer feedback.
+          If the customer had a positive experience, make sure to thank them.
+          If the customer had a negative or neutral experience, apologize and address their concerns respectfully and constructively.
+          Additionally, try to identify any potential improvements or criticisms mentioned in the review.
+          Do limit your response to 3 sentences.
+
+          <</SYS>>
+
+          Please classify the following customer review as either "Positive," "Negative," or "Neutral.". Then, provide a business owner's response accordingly.
+          Also, explicitly identify any potential improvements or criticisms mentioned in the review, filling them in the corresponding fields.
+          If none are mentioned, write "None" for each field.
+          The customer review is: "{review}"
+
+          Strictly format and return your output in the following JSON format: {"sentiment": "<Sentiment>", "response": "<Response>", "improvements": "<Improvements>", "criticisms": "<Criticisms>"}
+
+          [/INST]
+
+  generate_parameters:
+    max_tokens: 150
+    max_attempts: 3
+
+streamlit:
+  fastapi_endpoint: "http://0.0.0.0:8000"
