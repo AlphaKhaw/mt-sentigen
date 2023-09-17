@@ -131,3 +131,6 @@ inference:
   generate_parameters:
     max_tokens: 150
     max_attempts: 3
+
+streamlit:
+  fastapi_endpoint: "http://0.0.0.0:8000"
