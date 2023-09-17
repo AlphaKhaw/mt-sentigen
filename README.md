@@ -10,17 +10,17 @@ The `AI-Driven Customer Review Analysis` system serves as a comprehensive tool d
 
 ### **Features**
 
-**1. Sentiment Analysis:**
+- **Sentiment Analysis:**
 Offers nuanced categorizations of reviews into positive, neutral, or negative sentiments, taking into account the complexity and multifaceted nature of human emotions.
 
-**2. Context-rich Analysis:**
+- **Context-rich Analysis:**
 Identifies specific themes, trends, and business entities mentioned in reviews, allowing for a more focused and action-oriented business strategy. Highlights specific areas where a business excels or requires improvement.
 
-**3. Automated Generated Response:**
+- **Automated Generated Response:**
 Identifies specific themes, trends, and business entities mentioned in reviews, allowing for a more focused and action-oriented business strategy.
 Efficiently manage response to reviews and maintain brand voice.
 
-**4. User-friendly Interface:**
+- **User-friendly Interface:**
 Provides a straightforward and accessible UI where even non-technical users can input data as plain text or upload in CSV format for bulk processing.
 
 ### Who Should Use This?
@@ -40,22 +40,22 @@ The `MT-SentiGen` repository serves as a comprehensive framework for executing a
 
 ### Features
 
-1. **End-to-End Pipeline:**
+- **End-to-End Pipeline:**
 Incorporates ETL operations, data preprocessing, model training, and production deployment, providing a seamless workflow from data to insights.
 
-2. **Multitask Model with T5 and LLMs:**
+- **Multitask Model with T5 and LLMs:**
 Incorporates a T5 multitask model for specialized tasks, and augments it with the generalized capabilities of Llama2-7B-Chat for a robust analytical engine.
 
-3. **Scalability:**
+- **Scalability:**
 Built on a microservices architecture to support both vertical and horizontal scaling, allowing for robustness and extensibility.
 
-4. **Streamlit Integration:**
+- **Streamlit Integration:**
 Utilizes Streamlit for front-end development, creating a responsive and intuitive user interface for interacting with the backend models.
 
-5. **AWS Deployment:**
+- **AWS Deployment:**
 Optimized for cloud deployment on AWS, taking advantage of elastic scaling, data durability, and other cloud-native features.
 
-6. **CI/CD Implementation:**
+- **CI/CD Implementation:**
 Adopts CI/CD methodologies using tools like Jenkins or GitHub Actions for automated testing and deployment, ensuring the codebase remains robust and deployable at all times.
 
 
